@@ -491,17 +491,18 @@ int main(int argc, char* argv[]){
 		
 	    // progress bar	
 	    int barWidth = 50;
-            cout << "[";
-	    
-	    for (int i = 0; i < barWidth; ++i) {
-		if (i < (iter%100)/2) cout << "=";
-		else if (i == (iter%100)/2) cout << ">";
-		else cout << " ";
-	    }
-	    cout << "] " << iter%100 << " %\r";
-	    cout.flush();
+	    if(iter%100 != 0){
+		    cout << "[";
 
-	    if(iter%100 == 0){
+		    for (int i = 0; i < barWidth; ++i) {
+			if (i < (iter%100)/2) cout << "=";
+			else if (i == (iter%100)/2) cout << ">";
+			else cout << " ";
+		    }
+		    cout << "] " << iter%100 << " %\r";
+		    cout.flush();
+	    }
+	    else{
             	cout<<"Iteration: "<<iter%100<<", recruited reads number: "<<result.size()<<endl;
 	    }
             seeds.clear();
