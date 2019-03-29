@@ -522,7 +522,9 @@ int main(int argc, char* argv[]){
 			else cout << " ";
 		    }
 		    cout << "] " << 100 << " %\r";
-		    cout.flush();
+		    cout << endl;
+		    
+		    cout<<"Iteration: "<<iter%100<<", recruited reads number: "<<result.size()<<endl;
 	    }
         }
         cout<<"The total number of recruited reads (including seed reads) is: "<<saved_reads.size()<<endl;
