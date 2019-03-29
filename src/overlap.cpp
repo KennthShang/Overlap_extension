@@ -479,14 +479,31 @@ int main(int argc, char* argv[]){
         unordered_map<uint, uint> saved_reads;
         for(auto it=seeds.begin(); it!=seeds.end(); it++) saved_reads[it->first] = 1; // initialize with the seeds
         vector<uint> result;
+	
         uint iter = 0;
         while(seeds.size()!=0){
             for(uint i=0; i<d; i++){
                 uint seq_len = get_bwt_len(bwt[i]);
                 find_all_overlap(seeds, bwt[i], seq_len, rev_bwt[i], alphabet[i], cutoff, C[i], Occ[i], rev_Occ[i], seq_index_array[i], rev_seq_index_array[i], saved_reads, result, r);
             }
+		
+		
+		
+		
+	    int barWidth = 100;
+
+            std::cout << "[";
+	    
+	    for (int i = 0; i < barWidth; ++i) {
+		if (i < iter%100) cout << "=";
+		else if (i == iter%100) cout << ">";
+		else cout << " ";
+	    }
+	    cout << "] " << iter%100 << " %\r";
+	    cout.flush();
+
 	    if(iter%100 == 0){
-            	cout<<"Iteration: "<<iter<<", recruited reads number: "<<result.size()<<endl;
+            	cout<<"Iteration: "<<iter%100<<", recruited reads number: "<<result.size()<<endl;
 	    }
             seeds.clear();
             for(uint i=0; i<result.size(); i++) seeds[result[i]] = readsData[result[i]]; // use the new recruited reads for next iteration
