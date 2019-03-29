@@ -513,6 +513,17 @@ int main(int argc, char* argv[]){
             //for(auto it=seeds.begin(); it!=seeds.end(); it++) cout<<it->first<<'\t'<<it->second<<endl;
             result.clear();
             iter++;
+	    if(seeds.size()==0){
+		    cout << "[";
+
+		    for (int i = 0; i < barWidth; ++i) {
+			if (i < 49) cout << "=";
+			else if (i == 49) cout << ">";
+			else cout << " ";
+		    }
+		    cout << "] " << 100 << " %\r";
+		    cout.flush();
+	    }
         }
         cout<<"The total number of recruited reads (including seed reads) is: "<<saved_reads.size()<<endl;
 
