@@ -489,14 +489,13 @@ int main(int argc, char* argv[]){
 		
 		
 		
-		
-	    int barWidth = 100;
-
-            std::cout << "[";
+	    // progress bar	
+	    int barWidth = 50;
+            cout << "[";
 	    
 	    for (int i = 0; i < barWidth; ++i) {
-		if (i < iter%100) cout << "=";
-		else if (i == iter%100) cout << ">";
+		if (i < (iter%100)/2) cout << "=";
+		else if (i == (iter%100)/2) cout << ">";
 		else cout << " ";
 	    }
 	    cout << "] " << iter%100 << " %\r";
