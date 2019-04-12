@@ -282,7 +282,7 @@ string decode_DNA(string& bit_seq, uint L, unordered_map<char,char>alphabet){
     return seq;
 }
 
-void read_seed_file(const char* filename, unordered_map<string, unit>& reads_map){
+void read_seed_file(const char* filename, unordered_map<string, uint>& reads_map){
 	unordered_map<uint, string> result;
 	ifstream f(filename);
 	string line;
@@ -613,7 +613,7 @@ int main(int argc, char* argv[]){
     }
     // using seed reads as input
     else{
-	unordered_map<uint, string> seeds = read_seed_file(seed_file, reads_map)
+	unordered_map<uint, string> seeds = read_seed_file(seed_file, reads_map);
 	cout<<"The number of seed reads is: "<<seeds.size()<<endl;
         const char seed_out[] = "seed_reads.fa";
         output_fasta(seed_out, seeds, reads_title);
