@@ -316,14 +316,14 @@ unordered_map<uint, string> read_seed_file(const char* filename, unordered_map<s
             // the last sequence
             upper_str(seq);
             if(reads_map.find(seq)!=reads_map.end()){            // if the reads can be found
-                uint idx = reads_map[seq];                       // get the id of reads
+                uint idx = reads_map[title];                       // get the id of reads
                 result[idx] = seq;                               // get the reads
                 read_num++;
             }
-            else cout<<"Read: "<<lmap[0]<<" not found."<<endl;
+            else cout<<"Read: "<<title<<" not found."<<endl;
             f.close();
 
-            cout<<"The total number of reads number is:　"<<read_num<<endl;
+            cout<<"The total number of the seed-read file is:　"<<read_num<<endl;
 	}
 	
 	return result;
