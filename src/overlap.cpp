@@ -298,11 +298,11 @@ unordered_map<uint, string> read_seed_file(const char* filename, unordered_map<s
                     if(!title.empty() and !seq.empty()){
                         upper_str(seq);   // convert to upper case
 			if(reads_map.find(seq)!=reads_map.end()){            // if the reads can be found
-                            uint idx = reads_map[seq];                       // get the id of reads
+                            uint idx = reads_map[title];                       // get the id of reads
                             result[idx] = seq;                               // get the reads
                             read_num++;
                         }
-                        else cout<<"Read: "<<lmap[0]<<" not found."<<endl;
+                        else cout<<"Read: "<<title<<" not found."<<endl;
                         
                     }
                     vector<string> lmap = split(line, ' ');
@@ -362,7 +362,7 @@ int main(int argc, char* argv[]){
                 }
 		else if (strcmp(argv[i],"-s")==0){
 	            seed_file=argv[i+1];
-		    i++
+		    i++;
 		}
                 else if(strcmp(argv[i], "-c")==0){
                     char* cut_tmp = argv[i+1];
