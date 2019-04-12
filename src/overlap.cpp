@@ -287,6 +287,9 @@ void read_seed_file(const char* filename, unordered_map<string, uint>& reads_map
 	ifstream f(filename);
 	string line;
 	uint read_num = 0;
+        string header=">";
+        string title;
+        string seq;
 	
 	if(f.is_open()){
 	    while(getline (f,line))
@@ -312,10 +315,12 @@ void read_seed_file(const char* filename, unordered_map<string, uint>& reads_map
             }
             // the last sequence
             upper_str(seq);
-            reads_map[title] = read_num;
-            readsData.push_back(seq);
-            reads_title.push_back(title);
-            read_num++;
+            if(reads_map.find(seq)!=reads_map.end()){            // if the reads can be found
+                uint idx = reads_map[seq];                       // get the id of reads
+                result[idx] = seq;                               // get the reads
+                read_num++;
+            }
+            else cout<<"Read: "<<lmap[0]<<" not found."<<endl;
             f.close();
 
             cout<<"The total number of reads number is:　"<<read_num<<endl;
