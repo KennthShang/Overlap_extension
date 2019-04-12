@@ -282,7 +282,7 @@ string decode_DNA(string& bit_seq, uint L, unordered_map<char,char>alphabet){
     return seq;
 }
 
-void read_seed_file(const char* filename, unordered_map<string, uint>& reads_map){
+unordered_map<uint, string> read_seed_file(const char* filename, unordered_map<string, uint>& reads_map){
 	unordered_map<uint, string> result;
 	ifstream f(filename);
 	string line;
@@ -681,7 +681,7 @@ int main(int argc, char* argv[]){
         uint pair_count=0;
         string r_title, pair_title;
         uint pair_ID;
-        ofstream ofile(outfiles[n].c_str());
+        ofstream ofile(string(out_file).c_str());
         for(auto it=saved_reads.begin(); it!=saved_reads.end(); it++){
             uint idx = it->first;
             ofile<<">"<<reads_title[idx]<<endl;
