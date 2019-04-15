@@ -654,7 +654,8 @@ int main(int argc, char* argv[]){
 	        cout.flush();
             }
             else{
-       	        cout<<"Iteration: "<<iter%100<<", recruited reads number: "<<result.size()<<endl;
+		cout << endl;
+       	        cout <<"Iteration: "<<iter<<", recruited reads number: "<<result.size()<<endl;
             }
             seeds.clear();
             for(uint i=0; i<result.size(); i++) seeds[result[i]] = readsData[result[i]]; // use the new recruited reads for next iteration
@@ -672,7 +673,7 @@ int main(int argc, char* argv[]){
 		cout << "] " << 100 << " %\r";
 		cout << endl;
 		    
-		cout<<"Iteration: "<<iter%100<<", recruited reads number: "<<result.size()<<endl;
+		cout<<"Iteration: "<<iter<<", recruited reads number: "<<result.size()<<endl;
 	    }
         }
         cout<<"The total number of recruited reads (including seed reads) is: "<<saved_reads.size()<<endl;
