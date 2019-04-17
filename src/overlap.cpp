@@ -560,6 +560,7 @@ int main(int argc, char* argv[]){
 		        cout.flush();
 	        }
 	        else{
+		    cout << endl;
             	    cout<<"Iteration: "<<iter%100<<", recruited reads number: "<<result.size()<<endl;
 	        }
                 seeds.clear();
