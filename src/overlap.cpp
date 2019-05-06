@@ -585,7 +585,7 @@ int main(int argc, char* argv[]){
                 thread threads[d];
                 for(uint i=0; i<d; i++){
                     uint seq_len = get_bwt_len(bwt[i]);
-                    threads[i] = thread(find_all_overlap, ref(seeds), ref(bwt[i]), ref(seq_len), ref(rev_bwt[i]), ref(alphabet[i]), ref(cutoff), ref(C[i]), ref(Occ[i]), ref(rev_Occ[i]), ref(seq_index_array[i]), ref(rev_seq_index_array[i]), ref(saved_reads), ref(result), ref(r));
+                    threads[i] = thread(find_all_overlap, ref(seeds), ref(bwt[i]), seq_len, ref(rev_bwt[i]), ref(alphabet[i]), cutoff, ref(C[i]), ref(Occ[i]), ref(rev_Occ[i]), ref(seq_index_array[i]), ref(rev_seq_index_array[i]), ref(saved_reads), ref(result), r);
                     //find_all_overlap(seeds, bwt[i], seq_len, rev_bwt[i], alphabet[i], cutoff, C[i], Occ[i], rev_Occ[i], seq_index_array[i], rev_seq_index_array[i], saved_reads, result, r);
                 }
 		        for (auto& th : threads) th.join();
@@ -596,7 +596,7 @@ int main(int argc, char* argv[]){
 	            
                 // use the new recruited reads for next iteration
                 seeds.clear();
-                // unique_element_in_vector(result);
+                unique_element_in_vector(result);
                 for(uint i=0; i<result.size(); i++) seeds[result[i]] = readsData[result[i]]; 
             
                 // clear result for next generation
