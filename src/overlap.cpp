@@ -361,6 +361,15 @@ void progress_bar(int iter, int size){
 
 }
 
+vector<uint> unique_element_in_vector(vector<uint> v){
+	vector<uint>::iterator vector_iterator;
+	sort(v.begin(),v.end());
+	vector_iterator = unique(v.begin(),v.end());
+	if(vector_iterator != v.end()){
+		v.erase(vector_iterator,v.end());
+	}
+	return v;
+}
 
 int main(int argc, char* argv[]){
     clock_t start_time=clock();
@@ -587,6 +596,7 @@ int main(int argc, char* argv[]){
 	            
                 // use the new recruited reads for next iteration
                 seeds.clear();
+                unique_element_in_vector(result);
                 for(uint i=0; i<result.size(); i++) seeds[result[i]] = readsData[result[i]]; 
             
                 // clear result for next generation
