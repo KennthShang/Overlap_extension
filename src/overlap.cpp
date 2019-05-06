@@ -660,7 +660,7 @@ int main(int argc, char* argv[]){
         while(seeds.size()!=0){
             for(uint i=0; i<d; i++){
                 uint seq_len = get_bwt_len(bwt[i]);
-                c(seeds, bwt[i], seq_len, rev_bwt[i], alphabet[i], cutoff, C[i], Occ[i], rev_Occ[i], seq_index_array[i], rev_seq_index_array[i], saved_reads, result, r);
+                find_all_overlap(seeds, bwt[i], seq_len, rev_bwt[i], alphabet[i], cutoff, C[i], Occ[i], rev_Occ[i], seq_index_array[i], rev_seq_index_array[i], saved_reads, result, r);
             }
 		
 		
