@@ -596,7 +596,7 @@ int main(int argc, char* argv[]){
 	            
                 // use the new recruited reads for next iteration
                 seeds.clear();
-                unique_element_in_vector(result);
+                // unique_element_in_vector(result);
                 for(uint i=0; i<result.size(); i++) seeds[result[i]] = readsData[result[i]]; 
             
                 // clear result for next generation
@@ -614,6 +614,8 @@ int main(int argc, char* argv[]){
 		            }
 		            cout << "] " << 100 << " %\r";
 		            cout << endl;
+
+                    cout <<"Final Iteration: "<<iter<<endl;
 	            }
             } // end while
             cout<<"The total number of recruited reads (including seed reads) is: "<<saved_reads.size()<<endl;
