@@ -227,12 +227,6 @@ void find_all_overlap(unordered_map<uint, string>& seeds, string& bwt, uint L, s
     }
 }
 
-void job(unordered_map<uint, string>& seeds, string& bwt, uint L, string& rev_bwt, string& alphabet, uint cutoff, \
-                      uint* C, uint** Occ, uint** rev_Occ, uint* seq_index_array, uint* rev_seq_index_array, unordered_map<uint, uint>& saved_reads, vector<uint>& results, uint r){
-    
-    find_all_overlap(seeds, bwt, seq_len, rev_bwt, alphabet, cutoff, c, Occ, rev_Occ, seq_index_array, rev_seq_index_array, saved_reads, result, r);
-
-}
 
 char seq_alphabet[] = "ATUGCYRSWKMBDHVN";
 char rev_alphabet[] = "TAACGRYSWMKVHDBN";
