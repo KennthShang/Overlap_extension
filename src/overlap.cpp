@@ -592,7 +592,7 @@ int main(int argc, char* argv[]){
                 // clear result for next generation
                 result.clear();
                 iter++;
-
+                int barWidth = 50;
                 // Stop recruit
 	            if(seeds.size()==0){
 	    	        cout << "[";
