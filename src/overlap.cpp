@@ -15,6 +15,7 @@ Find overlap with saved bwt
 #include <algorithm>
 #include <unordered_map>
 #include <tuple>
+#include <thread>
 #include "radix.h"
 
 using namespace std;
@@ -546,41 +547,40 @@ int main(int argc, char* argv[]){
 		
 		
 		
-	        // progress bar	
-	        int barWidth = 50;
-	        if(iter%100 != 0){
-		        cout << "[";
+	            // progress bar	
+	            int barWidth = 50;
+	            if(iter%100 != 0){
+		            cout << "[";
 
-		        for (int i = 0; i < barWidth; ++i) {
-			    if (i < (iter%100)/2) cout << "=";
-			    else if (i == (iter%100)/2) cout << ">";
-			    else cout << " ";
-		        }
-		        cout << "] " << iter%100 << " %\r";
-		        cout.flush();
-	        }
-	        else{
-		    cout << endl;
+		            for (int i = 0; i < barWidth; ++i) {
+			            if (i < (iter%100)/2) cout << "=";
+			            else if (i == (iter%100)/2) cout << ">";
+			            else cout << " ";
+		            }
+		            cout << "] " << iter%100 << " %\r";
+		            cout.flush();
+	            }
+	            else{
+		            cout << endl;
             	    cout<<"Iteration: "<<iter%100<<", recruited reads number: "<<result.size()<<endl;
-	        }
+	            }
+
                 seeds.clear();
                 for(uint i=0; i<result.size(); i++) seeds[result[i]] = readsData[result[i]]; // use the new recruited reads for next iteration
             
                 result.clear();
                 iter++;
-	        if(seeds.size()==0){
+	            if(seeds.size()==0){
 	    	        cout << "[";
     
-		        for (int i = 0; i < barWidth; ++i) {
-		   	    if (i < 49) cout << "=";
-			    else if (i == 49) cout << ">";
-			    else cout << " ";
-		        }
-		        cout << "] " << 100 << " %\r";
-		        cout << endl;
-		    
-		        cout<<"Iteration: "<<iter%100<<", recruited reads number: "<<result.size()<<endl;
-	        }
+		            for (int i = 0; i < barWidth; ++i) {
+		   	            if (i < 49) cout << "=";
+			            else if (i == 49) cout << ">";
+			            else cout << " ";
+		            }
+		            cout << "] " << 100 << " %\r";
+		            cout << endl;
+	            }
             }
             cout<<"The total number of recruited reads (including seed reads) is: "<<saved_reads.size()<<endl;
 
@@ -619,15 +619,15 @@ int main(int argc, char* argv[]){
     }
     // using seed reads as input
     else{
-	unordered_map<uint, string> seeds = read_seed_file(seed_file, reads_map);
-	cout<<"The number of seed reads is: "<<seeds.size()<<endl;
+	    unordered_map<uint, string> seeds = read_seed_file(seed_file, reads_map);
+	    cout<<"The number of seed reads is: "<<seeds.size()<<endl;
         const char seed_out[] = "seed_reads.fa";
         output_fasta(seed_out, seeds, reads_title);
 		
 		
 		
 		
-	unordered_map<uint, uint> saved_reads;
+	    unordered_map<uint, uint> saved_reads;
         for(auto it=seeds.begin(); it!=seeds.end(); it++) saved_reads[it->first] = 1; // initialize with the seeds
         vector<uint> result;
 	    
@@ -642,20 +642,20 @@ int main(int argc, char* argv[]){
 		
 		
 	        // progress bar	
-	    int barWidth = 50;
-	    if(iter%100 != 0){
+	        int barWidth = 50;
+	        if(iter%100 != 0){
                 cout << "[";
 
                 for (int i = 0; i < barWidth; ++i) {
-		    if (i < (iter%100)/2) cout << "=";
-		    else if (i == (iter%100)/2) cout << ">";
-		    else cout << " ";
-	        }
-	        cout << "] " << iter%100 << " %\r";
-	        cout.flush();
+		            if (i < (iter%100)/2) cout << "=";
+		            else if (i == (iter%100)/2) cout << ">";
+		            else cout << " ";
+	            }
+	            cout << "] " << iter%100 << " %\r";
+	            cout.flush();
             }
             else{
-		cout << endl;
+		        cout << endl;
        	        cout <<"Iteration: "<<iter<<", recruited reads number: "<<result.size()<<endl;
             }
             seeds.clear();
@@ -663,19 +663,17 @@ int main(int argc, char* argv[]){
             
             result.clear();
             iter++;
-	    if(seeds.size()==0){
-	        cout << "[";
+	        if(seeds.size()==0){
+	            cout << "[";
     
-		for (int i = 0; i < barWidth; ++i) {
-		    if (i < 49) cout << "=";
-		    else if (i == 49) cout << ">";
-		    else cout << " ";
-		}
-		cout << "] " << 100 << " %\r";
-		cout << endl;
-		    
-		cout<<"Iteration: "<<iter<<", recruited reads number: "<<result.size()<<endl;
-	    }
+		        for (int i = 0; i < barWidth; ++i) {
+		            if (i < 49) cout << "=";
+		            else if (i == 49) cout << ">";
+		            else cout << " ";
+		        }
+		        cout << "] " << 100 << " %\r";
+		        cout << endl;
+	        }
         }
         cout<<"The total number of recruited reads (including seed reads) is: "<<saved_reads.size()<<endl;
 
