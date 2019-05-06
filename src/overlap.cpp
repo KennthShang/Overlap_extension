@@ -185,9 +185,9 @@ unordered_map<uint, uint>& saved_reads, vector<uint>& results, uint r, uint min_
                     uint read_id = seq_index_array[j]==max_read_idx?min_read_idx:seq_index_array[j]+1;
                     //cout<<"Read ID is: "<<read_id<<endl;
                     if(saved_reads.find(read_id)==saved_reads.end()){
-                        saved_reads[read_id]=T.length()-i; // save the overlap size
                         // critical section (exclusive access to std::cout signaled by locking lck):
                         lck.lock();
+                        saved_reads[read_id]=T.length()-i; // save the overlap size
                         results.push_back(read_id);
                         lck.unlock();
                     }
