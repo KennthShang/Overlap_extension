@@ -16,10 +16,15 @@ Find overlap with saved bwt
 #include <unordered_map>
 #include <tuple>
 #include <thread>
+#include <stdlib.h>                                                                                                    
+#include <pthread.h>  
 #include "radix.h"
+#include <mutex> 
 
 using namespace std;
 typedef unsigned int uint;
+
+mutex mtx; //  mutex for critical section
 
 void upper_str(string &seq){
     transform(seq.begin(), seq.end(), seq.begin(), ::toupper);
@@ -172,6 +177,8 @@ unordered_map<uint, uint>& saved_reads, vector<uint>& results, uint r, uint min_
             end1 = C[char_map['$']]+occ2-1;
             //cout<<"occ1: "<<occ1<<endl;
             //cout<<"occ2: "<<occ2<<endl;
+
+            unique_lock<std::mutex> lck (mtx,std::defer_lock);
             if(start1<=end1){
                 //cout<<start1<<'\t'<<end1<<endl;
                 for(uint j=start1; j<=end1; j++){
@@ -179,7 +186,10 @@ unordered_map<uint, uint>& saved_reads, vector<uint>& results, uint r, uint min_
                     //cout<<"Read ID is: "<<read_id<<endl;
                     if(saved_reads.find(read_id)==saved_reads.end()){
                         saved_reads[read_id]=T.length()-i; // save the overlap size
+                        // critical section (exclusive access to std::cout signaled by locking lck):
+                        lck.lock();
                         results.push_back(read_id);
+                        lck.unlock();
                     }
                 }
             }
@@ -215,6 +225,13 @@ void find_all_overlap(unordered_map<uint, string>& seeds, string& bwt, uint L, s
         reverse(rev_temp.begin(), rev_temp.end());
         find_overlap(rev_temp, rev_bwt, L, alphabet, cutoff, C, rev_Occ, rev_seq_index_array, saved_reads, results, r, rev_min_idx, rev_max_idx);
     }
+}
+
+void job(unordered_map<uint, string>& seeds, string& bwt, uint L, string& rev_bwt, string& alphabet, uint cutoff, \
+                      uint* C, uint** Occ, uint** rev_Occ, uint* seq_index_array, uint* rev_seq_index_array, unordered_map<uint, uint>& saved_reads, vector<uint>& results, uint r){
+    
+    find_all_overlap(seeds, bwt, seq_len, rev_bwt, alphabet, cutoff, c, Occ, rev_Occ, seq_index_array, rev_seq_index_array, saved_reads, result, r);
+
 }
 
 char seq_alphabet[] = "ATUGCYRSWKMBDHVN";
@@ -298,7 +315,7 @@ unordered_map<uint, string> read_seed_file(const char* filename, unordered_map<s
                 if (line[0]=='>'){
                     if(!title.empty() and !seq.empty()){
                         upper_str(seq);   // convert to upper case
-			if(reads_map.find(seq)!=reads_map.end()){            // if the reads can be found
+			            if(reads_map.find(seq)!=reads_map.end()){            // if the reads can be found
                             uint idx = reads_map[title];                       // get the id of reads
                             result[idx] = seq;                               // get the reads
                             read_num++;
@@ -328,6 +345,26 @@ unordered_map<uint, string> read_seed_file(const char* filename, unordered_map<s
 	}
 	
 	return result;
+}
+
+void progress_bar(int iter, int size){
+    int barWidth = 50;
+	if(iter%100 != 0){
+		cout << "[";
+
+		for (int i = 0; i < barWidth; ++i) {
+		    if (i < (iter%100)/2) cout << "=";
+			else if (i == (iter%100)/2) cout << ">";
+			else cout << " ";
+		}
+		cout << "] " << iter%100 << " %\r";
+		cout.flush();
+	}
+	else{
+		    cout << endl;
+            cout<<"Iteration: "<<iter%100<<", recruited reads number: "<< size <<endl;
+	}
+
 }
 
 
@@ -540,36 +577,29 @@ int main(int argc, char* argv[]){
 	
             uint iter = 0;
             while(seeds.size()!=0){
+
+                // iteration for whole index
+                thread threads[d];
                 for(uint i=0; i<d; i++){
                     uint seq_len = get_bwt_len(bwt[i]);
-                    find_all_overlap(seeds, bwt[i], seq_len, rev_bwt[i], alphabet[i], cutoff, C[i], Occ[i], rev_Occ[i], seq_index_array[i], rev_seq_index_array[i], saved_reads, result, r);
+                    threads[i] = thread(find_all_overlap, ref(seeds), ref(bwt[i]), seq_len, ref(rev_bwt[i]), ref(alphabet[i]), cutoff, ref(C[i]), ref(Occ[i]), ref(seq_index_array[i]), ref(rev_seq_index_array[i]), ref(saved_reads), ref(result), r);
+                    //find_all_overlap(seeds, bwt[i], seq_len, rev_bwt[i], alphabet[i], cutoff, C[i], Occ[i], rev_Occ[i], seq_index_array[i], rev_seq_index_array[i], saved_reads, result, r);
                 }
-		
+		        for (auto& th : threads) th.join();
 		
 		
 	            // progress bar	
-	            int barWidth = 50;
-	            if(iter%100 != 0){
-		            cout << "[";
-
-		            for (int i = 0; i < barWidth; ++i) {
-			            if (i < (iter%100)/2) cout << "=";
-			            else if (i == (iter%100)/2) cout << ">";
-			            else cout << " ";
-		            }
-		            cout << "] " << iter%100 << " %\r";
-		            cout.flush();
-	            }
-	            else{
-		            cout << endl;
-            	    cout<<"Iteration: "<<iter%100<<", recruited reads number: "<<result.size()<<endl;
-	            }
-
+                progress_bar(iter, result.size());
+	            
+                // use the new recruited reads for next iteration
                 seeds.clear();
-                for(uint i=0; i<result.size(); i++) seeds[result[i]] = readsData[result[i]]; // use the new recruited reads for next iteration
+                for(uint i=0; i<result.size(); i++) seeds[result[i]] = readsData[result[i]]; 
             
+                // clear result for next generation
                 result.clear();
                 iter++;
+
+                // Stop recruit
 	            if(seeds.size()==0){
 	    	        cout << "[";
     
@@ -581,7 +611,7 @@ int main(int argc, char* argv[]){
 		            cout << "] " << 100 << " %\r";
 		            cout << endl;
 	            }
-            }
+            } // end while
             cout<<"The total number of recruited reads (including seed reads) is: "<<saved_reads.size()<<endl;
 
 
@@ -636,7 +666,7 @@ int main(int argc, char* argv[]){
         while(seeds.size()!=0){
             for(uint i=0; i<d; i++){
                 uint seq_len = get_bwt_len(bwt[i]);
-                find_all_overlap(seeds, bwt[i], seq_len, rev_bwt[i], alphabet[i], cutoff, C[i], Occ[i], rev_Occ[i], seq_index_array[i], rev_seq_index_array[i], saved_reads, result, r);
+                c(seeds, bwt[i], seq_len, rev_bwt[i], alphabet[i], cutoff, C[i], Occ[i], rev_Occ[i], seq_index_array[i], rev_seq_index_array[i], saved_reads, result, r);
             }
 		
 		
