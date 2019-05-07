@@ -576,7 +576,7 @@ int main(int argc, char* argv[]){
                 uint sep_bwt = d/thread_num;
                 uint count = 0;
                 for(uint i=0; i<d; i+=sep_bwt){
-                    threads[count] = thread(submit_job, i, i+sep_bwt, ref(seeds), ref(bwt), ref(rev_bwt), ref(alphabet), cutoff, ref(C), ref(Occ), ref(rev_Occ), ref(seq_index_array), ref(rev_seq_index_array), ref(saved_reads), ref(result), r)
+                    threads[count] = thread(submit_job, i, i+sep_bwt, ref(seeds), ref(bwt), ref(rev_bwt), ref(alphabet), cutoff, ref(C), ref(Occ), ref(rev_Occ), ref(seq_index_array), ref(rev_seq_index_array), ref(saved_reads), ref(result), r);
                     count++;
                     //submit_job(i, i+sep_bwt, seeds, bwt, rev_bwt, alphabet, cutoff, C, Occ, rev_Occ, seq_index_array, rev_seq_index_array, saved_reads, result, r)
                 }
