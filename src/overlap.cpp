@@ -62,11 +62,9 @@ tuple<string, uint*> get_C(string &seq){
     sort(alphabet.begin(), alphabet.end());
 
     uint count=0;
-    //unordered_map<char, uint> C;
     uint* C= new uint[alphabet.length()];
     for(uint i=0; i<alphabet.length(); i++){
         C[i] = count;
-        //C[alphabet[i]] = count;
         count+= char_count[alphabet[i]];
     }
     return make_tuple(alphabet, C);
@@ -92,7 +90,7 @@ uint** get_Occ(string& bwt, string& alphabet){
 unordered_map<char,char> bit_map({{0,'$'},{1,'A'},{2,'C'},{4,'G'},{8,'T'},{9,'N'}});
 unordered_map<char, char> encode_map({{'$',0},{'A',1},{'C',2},{'G',4},{'T',8},{'N',9}});
 void find_overlap(string& T, string& bwt, uint L, string& alphabet, uint cutoff, uint* C, uint** Occ, uint* seq_index_array, \
-unordered_map<uint, uint>& saved_reads, vector<uint>& results, uint r, uint min_read_idx, uint max_read_idx){
+                    unordered_map<uint, uint>& saved_reads, vector<uint>& results, uint r, uint min_read_idx, uint max_read_idx){
     /*
     L: the length of the original bwt
     */
@@ -106,8 +104,6 @@ unordered_map<uint, uint>& saved_reads, vector<uint>& results, uint r, uint min_
     uint b_start = C[char_map[c]];
     uint b_end = c1==-1?L-1:C[char_map[c1]]-1;
 
-    //cout<<"i: "<<i<<T[i]<<'\t'<<"Initial loc: "<<b_start<<"\t"<<b_end<<endl;
-    //cout<<b_start<<'\t'<<b_end<<endl;
     uint start1, end1;
     uint occ_start, occ1, occ_end, occ2;
     while(b_start<=b_end && i>=2){
@@ -119,47 +115,34 @@ unordered_map<uint, uint>& saved_reads, vector<uint>& results, uint r, uint min_
         occ1 = Occ[char_map[c]][occ_start];
         occ_end = b_end/r;
         occ2 = Occ[char_map[c]][occ_end];
-        //cout<<"Initial occ: "<<occ_start<<'\t'<<occ_end<<'\t'<<occ1<<"\t"<<occ2<<endl;
         for(uint k=occ_start*r+1; k<=b_start-1; k++){
-            //if(bwt[k]==c) occ1++;
-            //cout<<bit_map[bwt[k/2]&240>>4]<<endl;
 
             if(k%2==0){
-                //if(bit_map[(bwt[k/2]&240)>>4]==c) occ1++;
                 if(char(bwt[k/2]&240)==c_up) occ1++;
-                //cout<<bit_map[(bwt[k/2]&240)>>4]<<endl;
             }
             else{
                 if(char(bwt[k/2]&15)==c_low) occ1++;
-                //cout<<bit_map[bwt[k/2]&15]<<endl;
             }
         }
         for(uint k=occ_end*r+1; k<=b_end; k++){
-            //if(bwt[k]==c) occ2++;
             if(k%2==0){
-                //if(bit_map[(bwt[k/2]&240)>>4]==c) occ2++;
                 if((char(bwt[k/2]&240))==c_up) occ2++;
-                //else if(bit_map[(bwt[k/2]&240)>>4]==c) cout<<char(bwt[k/2]&240)<<'\t'<<c_up<<endl;
-                //cout<<bit_map[(bwt[k/2]&240)>>4]<<endl;
             }
             else{
                 if(char(bwt[k/2]&15)==c_low) occ2++;
-                //else if(bit_map[(bwt[k/2]&15)]==c) cout<<char(bwt[k/2]&15)<<'\t'<<c_low<<endl;
-                //cout<<bit_map[bwt[k/2]&15]<<endl;
             }
         }
-        //cout<<"Updated occ: "<<occ1<<"\t"<<occ2<<endl;
 
         b_start = C[char_map[c]]+occ1;
         b_end = C[char_map[c]]+occ2-1;
-        //cout<<"i: "<<i-1<<T[i-1]<<'\t'<<"Updated loc: "<<b_start<<"\t"<<b_end<<endl;
+
         i--;
         if(T.length()-i>=cutoff && b_start<=b_end){
             occ_start = (b_start -1)/r;
             occ1 = Occ[char_map['$']][occ_start];
             for(uint k=occ_start*r+1; k<=b_start-1; k++){
-                //if(bwt[k]=='$') occ1++;
-                if(k%2==0){ //if(bit_map[(bwt[k/2]&240)>>4]=='$') occ1++;
+
+                if(k%2==0){ 
                     if(char(bwt[k/2]&240)==0) occ1++;
                 }
                 else{ if(char(bwt[k/2]&15)==0) occ1++;}
@@ -167,25 +150,21 @@ unordered_map<uint, uint>& saved_reads, vector<uint>& results, uint r, uint min_
             occ_end = b_end/r;
             occ2 = Occ[char_map['$']][occ_end];
             for(uint k=occ_end*r+1; k<=b_end; k++){
-                //if(bwt[k]=='$') occ2++;
+
                 if(k%2==0){ if(char(bwt[k/2]&240)==0) occ2++;}
                 else{ if(char(bwt[k/2]&15)==0) occ2++;}
             }
-            //cout<<"Updated occ ($): "<<occ1<<"\t"<<occ2<<endl;
+
             if(occ2<=occ1) continue;
             start1 = C[char_map['$']]+occ1;
             end1 = C[char_map['$']]+occ2-1;
-            //cout<<"occ1: "<<occ1<<endl;
-            //cout<<"occ2: "<<occ2<<endl;
+
 
             unique_lock<std::mutex> lck (mtx,std::defer_lock);
             if(start1<=end1){
-                //cout<<start1<<'\t'<<end1<<endl;
                 for(uint j=start1; j<=end1; j++){
                     uint read_id = seq_index_array[j]==max_read_idx?min_read_idx:seq_index_array[j]+1;
-                    //cout<<"Read ID is: "<<read_id<<endl;
                     if(saved_reads.find(read_id)==saved_reads.end()){
-                        // critical section (exclusive access to std::cout signaled by locking lck):
                         lck.lock();
                         saved_reads[read_id]=T.length()-i; // save the overlap size
                         results.push_back(read_id);
@@ -199,7 +178,7 @@ unordered_map<uint, uint>& saved_reads, vector<uint>& results, uint r, uint min_
 
 void rev_com(string&);
 void find_all_overlap(unordered_map<uint, string>& seeds, string& bwt, uint L, string& rev_bwt, string& alphabet, uint cutoff, \
-                      uint* C, uint** Occ, uint** rev_Occ, uint* seq_index_array, uint* rev_seq_index_array, unordered_map<uint, uint>& saved_reads, vector<uint>& results, uint r){
+                        uint* C, uint** Occ, uint** rev_Occ, uint* seq_index_array, uint* rev_seq_index_array, unordered_map<uint, uint>& saved_reads, vector<uint>& results, uint r){
 
     uint max_idx = 0, min_idx=0, rev_max_idx=0, rev_min_idx=0;
     uint read_num=C[1];
@@ -231,7 +210,7 @@ void find_all_overlap(unordered_map<uint, string>& seeds, string& bwt, uint L, s
 char seq_alphabet[] = "ATUGCYRSWKMBDHVN";
 char rev_alphabet[] = "TAACGRYSWMKVHDBN";
 unordered_map<char, char> convert ({{'A','T'},{'T','A'},{'U','A'},{'C','G'},{'G','C'},{'Y','R'},{'R','Y'},{'S','S'}, \
-{'W','W'},{'K','M'},{'M','K'},{'B','V'},{'D','H'},{'H','D'},{'V','B'},{'N','N'}});
+                                        {'W','W'},{'K','M'},{'M','K'},{'B','V'},{'D','H'},{'H','D'},{'V','B'},{'N','N'}});
 
 char complement(char n)
 {
@@ -345,7 +324,6 @@ void progress_bar(int iter, int size){
     int barWidth = 50;
 	if(iter%100 != 0){
 		cout << "[";
-
 		for (int i = 0; i < barWidth; ++i) {
 		    if (i < (iter%100)/2) cout << "=";
 			else if (i == (iter%100)/2) cout << ">";
@@ -355,8 +333,8 @@ void progress_bar(int iter, int size){
 		cout.flush();
 	}
 	else{
-		    cout << endl;
-            cout<<"Iteration: "<<iter%100<<", recruited reads number: "<< size <<endl;
+		cout << endl;
+        cout<<"Iteration: "<<iter%100<<", recruited reads number: "<< size << endl;
 	}
 
 }
@@ -371,6 +349,15 @@ vector<uint> unique_element_in_vector(vector<uint> v){
 	return v;
 }
 
+void submit_job(uint start, uint end, unordered_map<uint, string>& seeds, vector<string>& bwt, vector<string>& rev_bwt, vector<string>& alphabet, uint cutoff, \
+                        uint** C, uint*** Occ, uint*** rev_Occ, vector<uint*>& seq_index_array, vector<uint*>& rev_seq_index_array, unordered_map<uint, uint>& saved_reads, vector<uint>& results, uint r){
+    for(int i = start; i < end; i++){
+        uint seq_len = get_bwt_len(bwt[i]);
+        find_all_overlap(seeds, bwt[i], seq_len, rev_bwt[i], alphabet[i], cutoff, C[i], Occ[i], rev_Occ[i], seq_index_array[i], rev_seq_index_array[i], saved_reads, result, r);
+    }
+    
+}
+
 int main(int argc, char* argv[]){
     clock_t start_time=clock();
     char* sam_file = NULL;
@@ -381,8 +368,9 @@ int main(int argc, char* argv[]){
     char* out_file;
     bool pe = false;
     uint d = 5;
+    uint thread_num = 5;
     if (argc < 11){
-        cout<<"Usage is -S <samfile> -x <index> -f <readfile> [-pe <recruit PE> -k <partition number (5)] -c <cutoff> -o <outfile>\n";
+        cout<<"Usage is -S <samfile> -x <index> -f <readfile> [-pe <recruit PE> -k <partition number (5) -p <threads number (5)>] -c <cutoff> -o <outfile>\n";
         cin.get();
         exit(0);
     }
@@ -394,17 +382,21 @@ int main(int argc, char* argv[]){
                     i++;
                 }
                 else if (strcmp(argv[i],"-x")==0){
-                    index_file=argv[i+1];
+                    index_file = argv[i+1];
                     i++;
                 }
                 else if (strcmp(argv[i],"-f")==0){
-                    fa_file=argv[i+1];
+                    fa_file = argv[i+1];
                     i++;
                 }
-		else if (strcmp(argv[i],"-s")==0){
-	            seed_file=argv[i+1];
-		    i++;
-		}
+		            else if (strcmp(argv[i],"-s")==0){
+	                  seed_file = argv[i+1];
+		                i++;
+		            }
+                else if (strcmp(argv[i],"-p")==0){
+                    thread_num = argv[i+1];
+                    i++;
+                }
                 else if(strcmp(argv[i], "-c")==0){
                     char* cut_tmp = argv[i+1];
                     cutoff = atoi(cut_tmp);
@@ -440,7 +432,7 @@ int main(int argc, char* argv[]){
     uint read_num = 0;
 
     if (str_fa_file1.substr(str_fa_file1.length()-3,3)==string(".fa") || str_fa_file1.substr(str_fa_file1.length()-6,6)==string(".fasta")\
-     || str_fa_file1.substr(str_fa_file1.length()-4)==string(".fna")){
+        || str_fa_file1.substr(str_fa_file1.length()-4)==string(".fna")){
         string line;
         string header=">";
         ifstream f (str_fa_file1.c_str());
@@ -448,8 +440,7 @@ int main(int argc, char* argv[]){
         string seq;
 
         if (f.is_open()){
-            while(getline (f,line))
-            {
+            while(getline (f,line)){
                 if (line[0]=='>'){
                     if(!title.empty() and !seq.empty()){
                         upper_str(seq);   // convert to upper case
@@ -564,7 +555,7 @@ int main(int argc, char* argv[]){
             cout<< "Input files and output files number do not match!"<<endl;
             return 0;
         }
-	// if there are more then one sam file, do it one by one
+	      // if there are more then one sam file, do it one by one
         for(uint n=0; n<sams.size(); n++){   
             // overlap extension
             // read in sam file
@@ -580,18 +571,19 @@ int main(int argc, char* argv[]){
 	
             uint iter = 0;
             while(seeds.size()!=0){
-
                 // iteration for whole index
-                thread threads[d];
-                for(uint i=0; i<d; i++){
-                    uint seq_len = get_bwt_len(bwt[i]);
-                    threads[i] = thread(find_all_overlap, ref(seeds), ref(bwt[i]), seq_len, ref(rev_bwt[i]), ref(alphabet[i]), cutoff, ref(C[i]), ref(Occ[i]), ref(rev_Occ[i]), ref(seq_index_array[i]), ref(rev_seq_index_array[i]), ref(saved_reads), ref(result), r);
-                    //find_all_overlap(seeds, bwt[i], seq_len, rev_bwt[i], alphabet[i], cutoff, C[i], Occ[i], rev_Occ[i], seq_index_array[i], rev_seq_index_array[i], saved_reads, result, r);
+                thread threads[thread_num];
+                uint sep_bwt = d/thread_num;
+                uint count = 0;
+                for(uint i=0; i<d; i+=sep_bwt){
+                    threads[count] = thread(submit_job, i, i+sep_bwt, ref(seeds), ref(bwt), ref(rev_bwt), ref(alphabet), cutoff, ref(C), ref(Occ), ref(rev_Occ), rf(seq_index_array), ref(rev_seq_index_array), ref(saved_reads), ref(result), r)
+                    count++;
+                    //submit_job(i, i+sep_bwt, seeds, bwt, rev_bwt, alphabet, cutoff, C, Occ, rev_Occ, seq_index_array, rev_seq_index_array, saved_reads, result, r)
                 }
-		        for (auto& th : threads) th.join();
+		            for (auto& th : threads) th.join();
 		
 		
-	            // progress bar	
+	              // progress bar	
                 progress_bar(iter, result.size());
 	            
                 // use the new recruited reads for next iteration
@@ -604,19 +596,19 @@ int main(int argc, char* argv[]){
                 iter++;
                 int barWidth = 50;
                 // Stop recruit
-	            if(seeds.size()==0){
-	    	        cout << "[";
+	              if(seeds.size()==0){
+	    	            cout << "[";
     
-		            for (int i = 0; i < barWidth; ++i) {
-		   	            if (i < 49) cout << "=";
-			            else if (i == 49) cout << ">";
-			            else cout << " ";
-		            }
-		            cout << "] " << 100 << " %\r";
-		            cout << endl;
+		                for (int i = 0; i < barWidth; ++i) {
+		   	                if (i < 49) cout << "=";
+			                  else if (i == 49) cout << ">";
+			                  else cout << " ";
+		                }
+		                cout << "] " << 100 << " %\r";
+		                cout << endl;
 
                     cout <<"Final Iteration: "<<iter<<endl;
-	            }
+	              }
             } // end while
             cout<<"The total number of recruited reads (including seed reads) is: "<<saved_reads.size()<<endl;
 
@@ -660,9 +652,6 @@ int main(int argc, char* argv[]){
         const char seed_out[] = "seed_reads.fa";
         output_fasta(seed_out, seeds, reads_title);
 		
-		
-		
-		
 	    unordered_map<uint, uint> saved_reads;
         for(auto it=seeds.begin(); it!=seeds.end(); it++) saved_reads[it->first] = 1; // initialize with the seeds
         vector<uint> result;
@@ -675,25 +664,8 @@ int main(int argc, char* argv[]){
                 find_all_overlap(seeds, bwt[i], seq_len, rev_bwt[i], alphabet[i], cutoff, C[i], Occ[i], rev_Occ[i], seq_index_array[i], rev_seq_index_array[i], saved_reads, result, r);
             }
 		
-		
-		
 	        // progress bar	
-	        int barWidth = 50;
-	        if(iter%100 != 0){
-                cout << "[";
-
-                for (int i = 0; i < barWidth; ++i) {
-		            if (i < (iter%100)/2) cout << "=";
-		            else if (i == (iter%100)/2) cout << ">";
-		            else cout << " ";
-	            }
-	            cout << "] " << iter%100 << " %\r";
-	            cout.flush();
-            }
-            else{
-		        cout << endl;
-       	        cout <<"Iteration: "<<iter<<", recruited reads number: "<<result.size()<<endl;
-            }
+	        progress_bar(iter, result.size());
             seeds.clear();
             for(uint i=0; i<result.size(); i++) seeds[result[i]] = readsData[result[i]]; // use the new recruited reads for next iteration
             
