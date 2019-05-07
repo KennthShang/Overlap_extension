@@ -323,18 +323,18 @@ unordered_map<uint, string> read_seed_file(const char* filename, unordered_map<s
 void progress_bar(int iter, int size){
     int barWidth = 50;
     if(iter%100 != 0){
-      cout << "[";
-      for (int i = 0; i < barWidth; ++i) {
-          if (i < (iter%100)/2) cout << "=";
-        else if (i == (iter%100)/2) cout << ">";
-        else cout << " ";
-      }
-      cout << "] " << iter%100 << " %\r";
-      cout.flush();
+        cout << "[";
+        for (int i = 0; i < barWidth; ++i) {
+            if (i < (iter%100)/2) cout << "=";
+            else if (i == (iter%100)/2) cout << ">";
+            else cout << " ";
+        }
+        cout << "] " << iter%100 << " %\r";
+        cout.flush();
     }
     else{
-      cout << endl;
-          cout<<"Iteration: "<<iter%100<<", recruited reads number: "<< size << endl;
+        cout << endl;
+        cout<<"Iteration: "<<iter<<", recruited reads number: "<< size << endl;
     }
 }
 
